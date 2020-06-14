@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "Cthulhu.Experiment"
+		},
+		{
+			"path": "Cthulhu.Serialization"
+		},
+		{
+			"path": "Cthulhu.Eye"
+		}
+	],
+	"settings": {}
+}

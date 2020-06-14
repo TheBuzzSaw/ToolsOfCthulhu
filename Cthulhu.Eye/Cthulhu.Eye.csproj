@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cthulhu.Serialization\Cthulhu.Serialization.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <EyeOfCthulhuVersion>0.0.0.1</EyeOfCthulhuVersion>
+    <AssemblyVersion>$(EyeOfCthulhuVersion)</AssemblyVersion>
+    <FileVersion>$(EyeOfCthulhuVersion)</FileVersion>
+  </PropertyGroup>
+
+</Project>
