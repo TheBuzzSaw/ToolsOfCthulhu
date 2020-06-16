@@ -191,7 +191,7 @@ namespace Cthulhu.Serialization
 
         private void ReadData(MemoryReader reader)
         {
-            if (Version >= 135)
+            if (135 <= Version)
             {
                 var header = reader.ReadUInt64() & 0x00ffffffffffffff;
                 
