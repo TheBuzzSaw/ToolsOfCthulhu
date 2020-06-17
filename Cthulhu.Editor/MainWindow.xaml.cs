@@ -23,13 +23,15 @@ namespace Cthulhu.Editor
     /// </summary>
     public partial class MainWindow : Window
     {
+        private const double ScaleStep = 1.25;
+
         private readonly TranslateTransform _mapTranslation = new TranslateTransform();
         private readonly ScaleTransform _mapScale = new ScaleTransform();
         
         private Point _mapPosition = default;
         private Point? _panStart = default;
         private int _zoomStep = 0;
-        private double _scale = 1;
+        private double _mapScaleFactor = 1;
 
         public MainWindow()
         {
@@ -49,8 +51,8 @@ namespace Cthulhu.Editor
             worldCanvas.Background = Brushes.Blue;
 
             var pixelFormat = PixelFormats.Bgr24;
-            int width = 200;
-            int height = 200;
+            int width = 300;
+            int height = 300;
             int rawStride = (width * pixelFormat.BitsPerPixel + 7) / 8;
             var bytes = new byte[rawStride * height];
             var random = new Random();
@@ -65,6 +67,7 @@ namespace Cthulhu.Editor
             border.Child = image;
             border.Width = image.Width;
             border.Height = image.Height;
+            
 
             var transformGroup = new TransformGroup();
             transformGroup.Children.Add(_mapTranslation);
@@ -129,7 +132,11 @@ namespace Cthulhu.Editor
         {
             if (e.ChangedButton == MouseButton.Left)
             {
-                _panStart = e.GetPosition(worldCanvas);
+                if (!_panStart.HasValue)
+                {
+                    _panStart = e.GetPosition(worldCanvas);
+                    worldCanvas.Cursor = Cursors.ScrollAll;
+                }
             }
         }
 
@@ -141,20 +148,28 @@ namespace Cthulhu.Editor
                 {
                     var here = e.GetPosition(worldCanvas);
                     var diff = here - _panStart.Value;
-                    _mapPosition += diff / _scale;
+                    _mapPosition += diff / _mapScaleFactor;
                     _panStart = default;
+                    worldCanvas.Cursor = Cursors.Arrow;
                 }
             }
         }
 
         private void WorldCanvas_MouseMove(object sender, MouseEventArgs e)
         {
+            var here = e.GetPosition(worldCanvas);
+            
             if (_panStart.HasValue)
             {
-                var here = e.GetPosition(worldCanvas);
                 var diff = here - _panStart.Value;
-                _mapTranslation.X = _mapPosition.X + diff.X / _scale;
-                _mapTranslation.Y = _mapPosition.Y + diff.Y / _scale;
+                var destination = diff / _mapScaleFactor + _mapPosition;
+                _mapTranslation.X = destination.X;
+                _mapTranslation.Y = destination.Y;
+            }
+            else
+            {
+                var mapCoordinates = (Vector)here / _mapScaleFactor - (Vector)_mapPosition;
+                statusBarText.Text = new Point(Math.Floor(mapCoordinates.X), Math.Floor(mapCoordinates.Y)).ToString();
             }
         }
 
@@ -171,21 +186,23 @@ namespace Cthulhu.Editor
                     --_zoomStep;
                 }
 
-                _scale = Math.Pow(1.25, _zoomStep);
-                _mapScale.ScaleX = _scale;
-                _mapScale.ScaleY = _scale;
+                _mapScaleFactor = Math.Pow(ScaleStep, _zoomStep);
+                _mapScale.ScaleX = _mapScaleFactor;
+                _mapScale.ScaleY = _mapScaleFactor;
+
+                // TODO: Zoom in on mouse cursor's location. Fix translation.
             }
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Home)
+            if (e.Key == Key.Home && !_panStart.HasValue)
             {
-                _panStart = default;
                 _mapPosition = default;
                 _mapTranslation.X = 0;
                 _mapTranslation.Y = 0;
-                _scale = 1;
+                _zoomStep = 0;
+                _mapScaleFactor = 1;
                 _mapScale.ScaleX = 1;
                 _mapScale.ScaleY = 1;
             }
