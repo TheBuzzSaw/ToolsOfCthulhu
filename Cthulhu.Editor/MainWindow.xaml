@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:Cthulhu.Editor"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
-        Title="World Editor of Cthulhu" Height="450" Width="800">
+        Title="World Editor of Cthulhu" Height="450" Width="800"
+        KeyDown="Window_KeyDown">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -19,7 +20,7 @@
                 <ComboBox Name="worldComboBox" SelectionChanged="WorldComboBox_SelectionChanged" />
             </ToolBar>
         </ToolBarTray>
-        <Canvas Name="worldCanvas" Grid.Row="1" />
+        <Canvas Name="worldCanvas" Grid.Row="1" MouseDown="WorldCanvas_MouseDown" MouseUp="WorldCanvas_MouseUp" MouseMove="WorldCanvas_MouseMove" MouseWheel="WorldCanvas_MouseWheel" />
         <StatusBar Grid.Row="2">
             <StatusBarItem>
                 <TextBlock Name="statusBarText" Text="Status!" />
