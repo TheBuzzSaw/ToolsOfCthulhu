@@ -79,6 +79,7 @@ namespace Cthulhu.Serialization
         public int SpawnY { get; private set; }
         public double WorldSurfaceY { get; private set; }
         public double RockLayerY { get; private set; }
+        public int HellLayerY { get; private set; }
         public double GameTime { get; private set; }
         public bool IsDay { get; private set; }
         public int MoonPhase { get; private set; }
@@ -652,6 +653,10 @@ namespace Cthulhu.Serialization
                 KilledEmpressOfLight = reader.ReadBoolean();
                 KilledQueenSlime = reader.ReadBoolean();
             }
+
+            var wsy = (int)WorldSurfaceY;
+            HellLayerY = (WorldHeightInTiles - 230 - wsy) / 6;
+            HellLayerY = HellLayerY * 6 + wsy - 5;
         }
     
         private void ReadTiles(MemoryReader reader, BitArray importance)

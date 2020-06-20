@@ -156,7 +156,20 @@ namespace Cthulhu.Editor
                     }
                     else if (tile.HasWall)
                     {
+                        //color = _worldInfo.WallInfoById[tile.WallType].Color.Value;
+                        if (_worldInfo.WallInfoById.TryGetValue(tile.WallType, out var wallInfo) && wallInfo.Color.HasValue)
+                            color = wallInfo.Color.Value;
+                    }
+                    else
+                    {
+                        var y = pair.Key.Y;
 
+                        if (y < world.WorldSurfaceY)
+                            color = _worldInfo.SkyColor;
+                        else if (y < world.HellLayerY)
+                            color = _worldInfo.EarthColor;
+                        else
+                            color = _worldInfo.HellColor;
                     }
 
                     var position = pair.Key;
