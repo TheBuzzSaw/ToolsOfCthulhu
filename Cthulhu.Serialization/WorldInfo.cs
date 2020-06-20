@@ -12,11 +12,17 @@ namespace Cthulhu.Serialization
             using var stringReader = new StringReader(xml);
             var settings = new XmlReaderSettings
             {
-                IgnoreWhitespace = true
+                IgnoreWhitespace = true,
+                IgnoreComments = true
             };
             
             using var xmlReader = XmlReader.Create(stringReader, settings);
             var tileInfoById = new List<KeyValuePair<short, TileInfo>>();
+            var itemNameById = new List<KeyValuePair<int, string>>();
+            var npcById = new List<KeyValuePair<int, string>>();
+            var prefixById = new List<KeyValuePair<int, string>>();
+            var wallInfoById = new List<KeyValuePair<int, WallInfo>>();
+            var global = new List<KeyValuePair<string, Color24>>();
 
             while (xmlReader.Read())
             {
@@ -30,19 +36,77 @@ namespace Cthulhu.Serialization
                             tileInfoById.Add(KeyValuePair.Create(tileInfo.TileId, tileInfo));
                             break;
                         }
+
+                        case "item":
+                        {
+                            var itemId = int.Parse(xmlReader["num"]);
+                            var itemName = xmlReader["name"];
+                            itemNameById.Add(KeyValuePair.Create(itemId, itemName));
+                            break;
+                        }
+
+                        case "Npc":
+                        {
+                            var npcId = int.Parse(xmlReader["Id"]);
+                            var npcName = xmlReader["Name"];
+                            npcById.Add(KeyValuePair.Create(npcId, npcName));
+                            break;
+                        }
+
+                        case "prefix":
+                        {
+                            var prefixId = int.Parse(xmlReader["num"]);
+                            var prefixName = xmlReader["name"];
+                            prefixById.Add(KeyValuePair.Create(prefixId, prefixName));
+                            break;
+                        }
+
+                        case "wall":
+                        {
+                            var color = xmlReader["color"];
+                            var blend = xmlReader["blend"];
+
+                            var wallInfo = new WallInfo(
+                                int.Parse(xmlReader["num"]),
+                                xmlReader["name"],
+                                color is null ? default(Color24?) : Color24.Parse(color),
+                                blend is null ? -1 : int.Parse(blend));
+                            
+                            wallInfoById.Add(KeyValuePair.Create(wallInfo.WallId, wallInfo));
+                            break;
+                        }
+
+                        case "global":
+                        {
+                            global.Add(
+                                KeyValuePair.Create(
+                                    xmlReader["id"],
+                                    Color24.Parse(xmlReader["color"])));
+                            break;
+                        }
                     }
                 }
             }
 
             var worldInfo = new WorldInfo
             {
-                TileInfoById = tileInfoById.ToImmutableDictionary()
+                TileInfoById = tileInfoById.ToImmutableDictionary(),
+                ItemNameById = itemNameById.ToImmutableDictionary(),
+                NpcById = npcById.ToImmutableDictionary(),
+                PrefixById = prefixById.ToImmutableDictionary(),
+                WallInfoById = wallInfoById.ToImmutableDictionary(),
+                Global = global.ToImmutableDictionary()
             };
 
             return worldInfo;
         }
 
         public ImmutableDictionary<short, TileInfo> TileInfoById { get; private set; }
+        public ImmutableDictionary<int, string> ItemNameById { get; private set; }
+        public ImmutableDictionary<int, string> NpcById { get; private set; }
+        public ImmutableDictionary<int, string> PrefixById { get; private set; }
+        public ImmutableDictionary<int, WallInfo> WallInfoById { get; private set; }
+        public ImmutableDictionary<string, Color24> Global { get; private set; }
 
         private WorldInfo()
         {

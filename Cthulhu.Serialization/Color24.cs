@@ -51,7 +51,7 @@ namespace Cthulhu.Serialization
         }
 
         public bool Equals(Color24 other) => R == other.R && G == other.G && B == other.B;
-        public override bool Equals(object? obj) => obj is Color24 other && Equals(other);
+        public override bool Equals(object obj) => obj is Color24 other && Equals(other);
         public override int GetHashCode() => (R << 16) | (G << 8) | B;
 
         public override string ToString()
