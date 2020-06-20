@@ -14,14 +14,14 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <ToolBarTray Grid.Row="0">
-            <ToolBar HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top">
+        <ToolBarTray Grid.Row="0" Panel.ZIndex="2">
+            <ToolBar HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" >
                 <Button Name="refreshButton" Content="Refresh" VerticalAlignment="Top" Click="RefreshButton_Click"/>
                 <ComboBox Name="worldComboBox" SelectionChanged="WorldComboBox_SelectionChanged" />
             </ToolBar>
         </ToolBarTray>
-        <Canvas Name="worldCanvas" Grid.Row="1" MouseDown="WorldCanvas_MouseDown" MouseUp="WorldCanvas_MouseUp" MouseMove="WorldCanvas_MouseMove" MouseWheel="WorldCanvas_MouseWheel" RenderOptions.BitmapScalingMode="NearestNeighbor" />
-        <StatusBar Grid.Row="2">
+        <Canvas Name="worldCanvas" Grid.Row="1" MouseDown="WorldCanvas_MouseDown" MouseUp="WorldCanvas_MouseUp" MouseMove="WorldCanvas_MouseMove" MouseWheel="WorldCanvas_MouseWheel" RenderOptions.BitmapScalingMode="NearestNeighbor" Panel.ZIndex="0" />
+        <StatusBar Grid.Row="2" Panel.ZIndex="1">
             <StatusBarItem>
                 <TextBlock Name="statusBarText" Text="Status!" />
             </StatusBarItem>
