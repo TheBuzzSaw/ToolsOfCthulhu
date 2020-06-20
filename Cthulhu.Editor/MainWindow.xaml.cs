@@ -120,11 +120,49 @@ namespace Cthulhu.Editor
         {
             statusBarText.Text = "Loading " + worldFileName;
             var stopwatch = Stopwatch.StartNew();
-            var bytes = await File.ReadAllBytesAsync(worldFile);
-            statusBarText.Text = $"Loaded {bytes.Length} bytes in {stopwatch.ElapsedMilliseconds}ms. Parsing world...";
+            var worldBytes = await File.ReadAllBytesAsync(worldFile);
+            statusBarText.Text = $"Loaded {worldBytes.Length} bytes in {stopwatch.ElapsedMilliseconds}ms. Parsing world...";
             stopwatch.Restart();
-            var world = await Task.Run(() => World.FromWorldData(bytes));
-            statusBarText.Text = $"Loaded {world.Name} in {stopwatch.ElapsedMilliseconds}ms.";
+            var world = await Task.Run(() => World.FromWorldData(worldBytes));
+            statusBarText.Text = $"Loaded {world.Name} in {stopwatch.ElapsedMilliseconds}ms. Generating bitmap...";
+            stopwatch.Restart();
+            
+            var pixelFormat = PixelFormats.Bgr24;
+            int width = world.WorldWidthInTiles;
+            int height = world.WorldHeightInTiles;
+            int rawStride = (width * pixelFormat.BitsPerPixel + 7) / 8;
+            var imageBytes = await Task.Run(() =>
+            {
+                var bytes = new byte[rawStride * height];
+
+                foreach (var pair in world.Tiles)
+                {
+                    var tile = pair.Value;
+                    var tileInfo = _worldInfo.FindTileInfo(tile.TileType, tile.TextureU, tile.TextureV);
+                    var color = tileInfo.Color.GetValueOrDefault();
+
+                    var position = pair.Key;
+                    int index = position.Y * rawStride + position.X * 3;
+                    bytes[index + 0] = color.B;
+                    bytes[index + 1] = color.G;
+                    bytes[index + 2] = color.R;
+                }
+
+                return bytes;
+            });
+
+            var bitmap = BitmapSource.Create(width, height, 96, 96, pixelFormat, null, imageBytes, rawStride);
+            var image = new Image();
+            image.Width = width;
+            image.Source = bitmap;
+            image.ClipToBounds = true;
+
+            _border.Child = image;
+            _border.Width = image.Width;
+            _border.Height = image.Height;
+
+            statusBarText.Text = $"Loaded bitmap in {stopwatch.ElapsedMilliseconds}ms.";
+
             worldComboBox.IsEnabled = true;
             refreshButton.IsEnabled = true;
         }

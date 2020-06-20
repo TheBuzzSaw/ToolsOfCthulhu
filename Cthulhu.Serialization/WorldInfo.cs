@@ -17,7 +17,7 @@ namespace Cthulhu.Serialization
             };
             
             using var xmlReader = XmlReader.Create(stringReader, settings);
-            var tileInfoById = new List<KeyValuePair<short, TileInfo>>();
+            var tileInfoById = new List<KeyValuePair<int, TileInfo>>();
             var itemNameById = new List<KeyValuePair<int, string>>();
             var npcById = new List<KeyValuePair<int, string>>();
             var prefixById = new List<KeyValuePair<int, string>>();
@@ -33,7 +33,7 @@ namespace Cthulhu.Serialization
                         case "tile":
                         {
                             var tileInfo = TileInfo.Create(xmlReader);
-                            tileInfoById.Add(KeyValuePair.Create(tileInfo.TileId, tileInfo));
+                            tileInfoById.Add(KeyValuePair.Create((int)tileInfo.TileId, tileInfo));
                             break;
                         }
 
@@ -101,7 +101,7 @@ namespace Cthulhu.Serialization
             return worldInfo;
         }
 
-        public ImmutableDictionary<short, TileInfo> TileInfoById { get; private set; }
+        public ImmutableDictionary<int, TileInfo> TileInfoById { get; private set; }
         public ImmutableDictionary<int, string> ItemNameById { get; private set; }
         public ImmutableDictionary<int, string> NpcById { get; private set; }
         public ImmutableDictionary<int, string> PrefixById { get; private set; }
@@ -110,6 +110,18 @@ namespace Cthulhu.Serialization
 
         private WorldInfo()
         {
+        }
+
+        public TileInfo FindTileInfo(int id, short u, short v)
+        {
+            if (TileInfoById.TryGetValue(id, out var tileInfo))
+            {
+                return tileInfo.Find(u, v);
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

@@ -105,8 +105,25 @@ namespace Cthulhu.Serialization
         public bool CanMerge { get; private set; }
         public bool IsHighlighting { get; private set; }
 
-        private TileInfo Clone() => (TileInfo)MemberwiseClone();
+        internal TileInfo Find(short u, short v)
+        {
+            foreach (var variant in Variants)
+            {
+                if ((variant.U < 0 || variant.U == u) &&
+                   (variant.V < 0 || variant.V == v) &&
+                   (variant.MinU < 0 || variant.MinU <= u) &&
+                   (variant.MinV < 0 || variant.MinV <= v) &&
+                   (variant.MaxU < 0 || variant.MaxU > u) &&
+                   (variant.MaxV < 0 || variant.MaxV > v))
+                {
+                    return variant.Find(u, v);
+                }
+            }
+            
+            return this;
+        }
 
+        private TileInfo Clone() => (TileInfo)MemberwiseClone();
         public override string ToString() => Name;
     }
 }
