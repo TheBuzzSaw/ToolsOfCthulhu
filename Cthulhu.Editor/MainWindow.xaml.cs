@@ -138,8 +138,13 @@ namespace Cthulhu.Editor
                 foreach (var pair in world.Tiles)
                 {
                     var tile = pair.Value;
-                    var tileInfo = _worldInfo.FindTileInfo(tile.TileType, tile.TextureU, tile.TextureV);
-                    var color = tileInfo.Color.GetValueOrDefault();
+                    var color = default(Color24);
+                    
+                    if (tile.IsActive)
+                    {
+                        var tileInfo = _worldInfo.FindTileInfo(tile.TileType, tile.TextureU, tile.TextureV);
+                        color = tileInfo.Color.GetValueOrDefault(color);
+                    }
 
                     var position = pair.Key;
                     int index = position.Y * rawStride + position.X * 3;
