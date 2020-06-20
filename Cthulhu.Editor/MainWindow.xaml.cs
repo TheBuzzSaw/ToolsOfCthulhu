@@ -27,14 +27,17 @@ namespace Cthulhu.Editor
 
         private readonly TranslateTransform _mapTranslation = new TranslateTransform();
         private readonly ScaleTransform _mapScale = new ScaleTransform();
+        private readonly Border _border = new Border();
+        private readonly WorldInfo _worldInfo;
         
         private Point _mapPosition = default;
         private Point? _panStart = default;
         private int _zoomStep = 0;
         private double _mapScaleFactor = 1;
 
-        public MainWindow()
+        public MainWindow(WorldInfo worldInfo)
         {
+            _worldInfo = worldInfo;
             InitializeComponent();
         }
 
@@ -63,18 +66,16 @@ namespace Cthulhu.Editor
             image.Source = bitmap;
             image.ClipToBounds = true;
             
-            var border = new Border();
-            border.Child = image;
-            border.Width = image.Width;
-            border.Height = image.Height;
-            
+            _border.Child = image;
+            _border.Width = image.Width;
+            _border.Height = image.Height;
 
             var transformGroup = new TransformGroup();
             transformGroup.Children.Add(_mapTranslation);
             transformGroup.Children.Add(_mapScale);
-            border.RenderTransform = transformGroup;
+            _border.RenderTransform = transformGroup;
             
-            worldCanvas.Children.Add(border);
+            worldCanvas.Children.Add(_border);
         }
 
         private void LoadWorldList()

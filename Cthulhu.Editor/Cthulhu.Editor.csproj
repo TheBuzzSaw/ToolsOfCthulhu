@@ -1,6 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <ItemGroup>
+    <Content Include="..\tiles.xml" Link="tiles.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Cthulhu.Serialization\Cthulhu.Serialization.csproj" />
   </ItemGroup>
 
