@@ -140,10 +140,23 @@ namespace Cthulhu.Editor
                     var tile = pair.Value;
                     var color = default(Color24);
                     
-                    if (tile.IsActive)
+                    if (tile.IsActive || tile.HasActuator)
                     {
                         var tileInfo = _worldInfo.FindTileInfo(tile.TileType, tile.TextureU, tile.TextureV);
                         color = tileInfo.Color.GetValueOrDefault(color);
+                    }
+                    else if (tile.HasLiquid)
+                    {
+                        if (tile.HasLava)
+                            color = _worldInfo.LavaColor;
+                        else if (tile.HasHoney)
+                            color = _worldInfo.HoneyColor;
+                        else
+                            color = _worldInfo.WaterColor;
+                    }
+                    else if (tile.HasWall)
+                    {
+
                     }
 
                     var position = pair.Key;

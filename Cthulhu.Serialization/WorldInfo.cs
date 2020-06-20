@@ -22,7 +22,7 @@ namespace Cthulhu.Serialization
             var npcById = new List<KeyValuePair<int, string>>();
             var prefixById = new List<KeyValuePair<int, string>>();
             var wallInfoById = new List<KeyValuePair<int, WallInfo>>();
-            var global = new List<KeyValuePair<string, Color24>>();
+            var global = new Dictionary<string, Color24>();
 
             while (xmlReader.Read())
             {
@@ -79,9 +79,8 @@ namespace Cthulhu.Serialization
                         case "global":
                         {
                             global.Add(
-                                KeyValuePair.Create(
-                                    xmlReader["id"],
-                                    Color24.Parse(xmlReader["color"])));
+                                xmlReader["id"],
+                                Color24.Parse(xmlReader["color"]));
                             break;
                         }
                     }
@@ -95,7 +94,14 @@ namespace Cthulhu.Serialization
                 NpcById = npcById.ToImmutableDictionary(),
                 PrefixById = prefixById.ToImmutableDictionary(),
                 WallInfoById = wallInfoById.ToImmutableDictionary(),
-                Global = global.ToImmutableDictionary()
+                Global = global.ToImmutableDictionary(),
+                SkyColor = global["sky"],
+                EarthColor = global["earth"],
+                RockColor = global["rock"],
+                HellColor = global["hell"],
+                WaterColor = global["water"],
+                LavaColor = global["lava"],
+                HoneyColor = global["honey"]
             };
 
             return worldInfo;
@@ -107,6 +113,13 @@ namespace Cthulhu.Serialization
         public ImmutableDictionary<int, string> PrefixById { get; private set; }
         public ImmutableDictionary<int, WallInfo> WallInfoById { get; private set; }
         public ImmutableDictionary<string, Color24> Global { get; private set; }
+        public Color24 SkyColor { get; private set; }
+        public Color24 EarthColor { get; private set; }
+        public Color24 RockColor { get; private set; }
+        public Color24 HellColor { get; private set; }
+        public Color24 WaterColor { get; private set; }
+        public Color24 LavaColor { get; private set; }
+        public Color24 HoneyColor { get; private set; }
 
         private WorldInfo()
         {
