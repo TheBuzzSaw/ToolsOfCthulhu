@@ -181,6 +181,28 @@ namespace Cthulhu.Serialization
         public bool KilledEmpressOfLight { get; private set; }
         public bool KilledQueenSlime { get; private set; }
 
+        public IEnumerable<KeyValuePair<Point32, Tile>> Tiles
+        {
+            get
+            {
+                int x = 0;
+                int y = 0;
+
+                foreach (var tile in _tiles)
+                {
+                    var point = new Point32(x, y);
+                    var pair = KeyValuePair.Create(point, tile);
+                    yield return pair;
+
+                    if (WorldHeightInTiles <= ++y)
+                    {
+                        ++x;
+                        y = 0;
+                    }
+                }
+            }
+        }
+
         private World(int version)
         {
             Version = version;

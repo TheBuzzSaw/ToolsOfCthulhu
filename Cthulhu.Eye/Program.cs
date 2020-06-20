@@ -15,10 +15,56 @@ namespace Cthulhu.Eye
         private static readonly string theDivider = string.Join(' ', Enumerable.Repeat("---", 4));
         private static readonly ImmutableArray<Option<Action<World>>> theOpenWorldOptions = ImmutableArray.Create<Option<Action<World>>>(
             CreateWao("Dump world meta data as JSON", DumpWorldMetaDataAsJson),
-            CreateWao("Search Chests by Item ID", SearchChestsByItemId)
+            CreateWao("Search Chests by Item ID", SearchChestsByItemId),
+            CreateWao("Search Tiles by Item ID", SearchTilesByItemId)
         );
 
         static Option<Action<World>> CreateWao(string displayText, Action<World> action) => Option.Create(displayText, action);
+
+        static void SearchTilesByItemId(World world)
+        {
+            var stopwatch = new Stopwatch();
+
+            while (true)
+            {
+                Console.WriteLine();
+                Console.WriteLine($"Search all tiles in {world.Name} by item ID");
+                Console.WriteLine("Enter item ID:");
+
+                var line = Console.ReadLine();
+                var split = line.Split('-', StringSplitOptions.RemoveEmptyEntries);
+
+                if (split.Length < 1 || !int.TryParse(split[0], out var itemId))
+                    break;
+                
+                int? u = default;
+                
+                if (1 < split.Length)
+                {
+                    if (!int.TryParse(split[1], out var uu))
+                        break;
+                    
+                    u = uu;
+                }
+                
+                stopwatch.Restart();
+                
+                var tiles = world.Tiles
+                    .Where(t => t.Value.TileType == itemId && (!u.HasValue || t.Value.TextureU == u.Value))
+                    .Select(t => t.Key)
+                    .ToList();
+                var elapsed = stopwatch.Elapsed;
+                
+                if (tiles.Count < 100)
+                {
+                    foreach (var tile in tiles)
+                        Console.WriteLine(tile);
+                }
+                
+                var word = tiles.Count == 1 ? "tile" : "tiles";
+                Console.WriteLine($"Found {tiles.Count} {word} in {elapsed}");
+            }
+        }
 
         static void DumpWorldMetaDataAsJson(World world)
         {
