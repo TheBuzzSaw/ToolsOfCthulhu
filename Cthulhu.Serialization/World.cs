@@ -204,6 +204,13 @@ namespace Cthulhu.Serialization
             }
         }
 
+        public Point32 GetGpsPosition(Point32 position)
+        {
+            var x = (position.X - WorldWidthInTiles / 2) * 2;
+            var y = (position.Y - (int)WorldSurfaceY) * 2;
+            return new Point32(x, y);
+        }
+
         private World(int version)
         {
             Version = version;

@@ -34,6 +34,7 @@ namespace Cthulhu.Editor
         private Point? _panStart = default;
         private int _zoomStep = 0;
         private double _mapScaleFactor = 1;
+        private World _world = default;
 
         public MainWindow(WorldInfo worldInfo)
         {
@@ -123,19 +124,19 @@ namespace Cthulhu.Editor
             var worldBytes = await File.ReadAllBytesAsync(worldFile);
             statusBarText.Text = $"Loaded {worldBytes.Length} bytes in {stopwatch.ElapsedMilliseconds}ms. Parsing world...";
             stopwatch.Restart();
-            var world = await Task.Run(() => World.FromWorldData(worldBytes));
-            statusBarText.Text = $"Loaded {world.Name} in {stopwatch.ElapsedMilliseconds}ms. Generating bitmap...";
+            _world = await Task.Run(() => World.FromWorldData(worldBytes));
+            statusBarText.Text = $"Loaded {_world.Name} in {stopwatch.ElapsedMilliseconds}ms. Generating bitmap...";
             stopwatch.Restart();
             
             var pixelFormat = PixelFormats.Bgr24;
-            int width = world.WorldWidthInTiles;
-            int height = world.WorldHeightInTiles;
+            int width = _world.WorldWidthInTiles;
+            int height = _world.WorldHeightInTiles;
             int rawStride = (width * pixelFormat.BitsPerPixel + 7) / 8;
             var imageBytes = await Task.Run(() =>
             {
                 var bytes = new byte[rawStride * height];
 
-                foreach (var pair in world.Tiles)
+                foreach (var pair in _world.Tiles)
                 {
                     var tile = pair.Value;
                     var color = default(Color24);
@@ -164,9 +165,9 @@ namespace Cthulhu.Editor
                     {
                         var y = pair.Key.Y;
 
-                        if (y < world.WorldSurfaceY)
+                        if (y < _world.WorldSurfaceY)
                             color = _worldInfo.SkyColor;
-                        else if (y < world.HellLayerY)
+                        else if (y < _world.HellLayerY)
                             color = _worldInfo.EarthColor;
                         else
                             color = _worldInfo.HellColor;
@@ -236,10 +237,21 @@ namespace Cthulhu.Editor
                 _mapTranslation.X = destination.X;
                 _mapTranslation.Y = destination.Y;
             }
-            else
+            else if (_world != null)
             {
                 var mapCoordinates = (Vector)here / _mapScaleFactor - (Vector)_mapPosition;
-                statusBarText.Text = new Point(Math.Floor(mapCoordinates.X), Math.Floor(mapCoordinates.Y)).ToString();
+                var tileCoordinates = new Point32((int)mapCoordinates.X, (int)mapCoordinates.Y);
+
+                if (0 <= tileCoordinates.X &&
+                    tileCoordinates.X < _world.WorldWidthInTiles &&
+                    0 <= tileCoordinates.Y &&
+                    tileCoordinates.Y < _world.WorldHeightInTiles)
+                {
+                    var gps = _world.GetGpsPosition(tileCoordinates);
+                    var xText = gps.X < 0 ? $"{-gps.X} west" : $"{gps.X} east";
+                    var yText = gps.Y < 0 ? $"{-gps.Y} above" : $"{gps.Y} below";
+                    statusBarText.Text = $"{tileCoordinates} ({xText} {yText})";
+                }
             }
         }
 
@@ -247,6 +259,9 @@ namespace Cthulhu.Editor
         {
             if (!_panStart.HasValue) // No zooming while panning.
             {
+                var here = e.GetPosition(worldCanvas);
+                var absoluteHere = (Vector)here / _mapScaleFactor - (Vector)_mapPosition;
+
                 if (e.Delta > 0)
                 {
                     ++_zoomStep;
@@ -260,7 +275,9 @@ namespace Cthulhu.Editor
                 _mapScale.ScaleX = _mapScaleFactor;
                 _mapScale.ScaleY = _mapScaleFactor;
 
-                // TODO: Zoom in on mouse cursor's location. Fix translation.
+                _mapPosition = (Point)((Vector)here / _mapScaleFactor - absoluteHere);
+                _mapTranslation.X = _mapPosition.X;
+                _mapTranslation.Y = _mapPosition.Y;
             }
         }
 
