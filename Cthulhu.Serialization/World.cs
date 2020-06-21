@@ -217,7 +217,7 @@ namespace Cthulhu.Serialization
         }
 
         private int IndexOf(int x, int y) => x * WorldHeightInTiles + y;
-        private Tile GetTile(int x, int y) => _tiles[IndexOf(x, y)];
+        public Tile GetTile(int x, int y) => _tiles[IndexOf(x, y)];
 
         private void ReadData(MemoryReader reader)
         {

@@ -247,10 +247,36 @@ namespace Cthulhu.Editor
                     0 <= tileCoordinates.Y &&
                     tileCoordinates.Y < _world.WorldHeightInTiles)
                 {
+                    var tileText = "no tile";
+                    var tile = _world.GetTile(tileCoordinates.X, tileCoordinates.Y);
+
+                    if (tile.IsActive || tile.HasActuator)
+                    {
+                        var tileInfo = _worldInfo.FindTileInfo(tile.TileType, tile.TextureU, tile.TextureV);
+
+                        if (tileInfo != null)
+                            tileText = tileInfo.Name;
+                    }
+
+                    var liquidText = "no liquid";
+                    if (tile.HasLiquid)
+                    {
+                        if (tile.HasLava)
+                            liquidText = "Lava";
+                        else if (tile.HasHoney)
+                            liquidText = "Honey";
+                        else
+                            liquidText = "Water";
+                    }
+
+                    var wallText = "no wall";
+                    if (tile.HasWall && _worldInfo.WallInfoById.TryGetValue(tile.WallType, out var wallInfo))
+                        wallText = wallInfo.Name;
+
                     var gps = _world.GetGpsPosition(tileCoordinates);
-                    var xText = gps.X < 0 ? $"{-gps.X} west" : $"{gps.X} east";
-                    var yText = gps.Y < 0 ? $"{-gps.Y} above" : $"{gps.Y} below";
-                    statusBarText.Text = $"{tileCoordinates} ({xText} {yText})";
+                    var xText = gps.X < 0 ? $"{-gps.X} feet west" : $"{gps.X} feet east";
+                    var yText = gps.Y < 0 ? $"{-gps.Y} feet above" : $"{gps.Y} feet below";
+                    statusBarText.Text = $"{tileCoordinates} ({xText} {yText}) {tileText} - {liquidText} - {wallText}";
                 }
             }
         }
