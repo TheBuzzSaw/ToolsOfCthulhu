@@ -23,7 +23,9 @@ namespace Cthulhu.Serialization
             }
             else
             {
-                return null;
+                var localFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                var worldFolder = Path.Combine(localFolder, "Terraria", "Worlds");
+                return worldFolder;
             }
         }
 
@@ -182,6 +184,7 @@ namespace Cthulhu.Serialization
         public bool KilledEmpressOfLight { get; private set; }
         public bool KilledQueenSlime { get; private set; }
 
+        [JsonIgnore]
         public IEnumerable<KeyValuePair<Point32, Tile>> Tiles
         {
             get
